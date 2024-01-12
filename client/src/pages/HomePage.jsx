@@ -30,7 +30,7 @@ function HomePage() {
 
   useEffect(() => {
     getProducts();
-  }, []);
+  }, [products]);
 
   return (
     <div>
