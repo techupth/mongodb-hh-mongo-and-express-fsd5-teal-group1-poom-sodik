@@ -24,7 +24,7 @@ function HomePage() {
 
   const deleteProduct = async (productId) => {
     await axios.delete(`http://localhost:4001/products/${productId}`);
-    const newProducts = products.filter((product) => product.id !== productId);
+    const newProducts = products.filter((product) => product._id !== productId);
     setProducts(newProducts);
   };
 
@@ -85,7 +85,7 @@ function HomePage() {
               <div className="product-detail">
                 <h1>Product name: {product.name} </h1>
                 <h2>Product price: {product.price}</h2>
-                <h3>Category: IT</h3>
+                <h3>Category: {product.category}</h3>
                 <h3>Created Time: 1 Jan 2011, 00:00:00</h3>
                 <p>Product description: {product.description} </p>
                 <div className="product-actions">
