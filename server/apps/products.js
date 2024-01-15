@@ -5,11 +5,37 @@ const productRouter = Router();
 
 productRouter.get("/", async (req, res) => {
   const collection = db.collection("product");
+
+  const searchArgument = {};
+  let page = Number(req.query.page);
+  if (!req.query.name || !req.query.category) {
+    searchArgument;
+  }
+  if (req.query.name) {
+    searchArgument.name = new RegExp(req.query.name, "i");
+  }
+  if (req.query.category) {
+    searchArgument.category = req.query.category;
+  }
+  if (!req.query.page) {
+    page = 0;
+  }
+
   try {
-    const productFetch = await collection.find({}).toArray();
+    console.log(page);
+    const getAlltoCalculate = await collection.find(searchArgument).toArray();
+    const totalPage = Math.ceil(getAlltoCalculate.length / 5);
+    const productFetch = await collection
+      .find(searchArgument)
+      .sort({ create_time: -1 })
+      .skip(page * 5)
+      .limit(+(req.query.limit ?? 5))
+      .toArray();
+
     return res.json({
       message: "Fetch successfully",
       data: productFetch,
+      totalPage,
     });
   } catch (err) {
     return res.status(500).json({
@@ -40,14 +66,19 @@ productRouter.post("/", async (req, res) => {
   if (!name || !description || !price || !image) {
     return res.status(400).json({ message: "Missing required fields" });
   }
+  const date = new Date();
+
   const newProduct = {
     name,
     price,
     image,
     description,
     category,
+    create_time: new Date().toISOString(),
   };
+
   const productData = { ...newProduct };
+
   try {
     const product = await collection.insertOne(productData);
     return res.json({

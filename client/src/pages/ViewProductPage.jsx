@@ -13,6 +13,27 @@ function ViewProductPage() {
     );
     setProduct(results.data.data);
   };
+  function displayTime(createTime) {
+    const date = new Date(createTime);
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+
+    return `${date.getDate()} ${
+      months[date.getMonth()]
+    } ${date.getFullYear()} ${date.toLocaleTimeString()}`;
+  }
 
   useEffect(() => {
     getProduct();
@@ -24,7 +45,7 @@ function ViewProductPage() {
       <div className="view-product-container">
         <h2>Name : {product.name}</h2>
         <h3>Category: IT</h3>
-        <h3>Created Time: 1 Jan 2011, 00:00:00</h3>
+        <h3>Created Time: {displayTime(product.create_time)}</h3>
         <p>Price : {product.price}</p>
         <p>Description :{product.description}</p>
       </div>

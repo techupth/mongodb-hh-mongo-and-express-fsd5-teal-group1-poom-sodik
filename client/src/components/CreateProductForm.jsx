@@ -7,7 +7,7 @@ function CreateProductForm() {
   const [imageUrl, setImageUrl] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("fasion");
+  const [category, setCategory] = useState("");
   const navigate = useNavigate();
 
   const createProducts = async () => {

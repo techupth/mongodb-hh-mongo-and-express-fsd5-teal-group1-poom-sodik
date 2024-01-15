@@ -8,29 +8,64 @@ function HomePage() {
   const [products, setProducts] = useState([]);
   const [isError, setIsError] = useState(null);
   const [isLoading, setIsLoading] = useState(null);
-
+  const [category, setCategory] = useState("");
+  const [keyword, setKeyword] = useState("");
+  const [page, setPage] = useState(0);
+  const [limit, setLimit] = useState(5);
+  const [totalPage, setTotalPage] = useState(0);
   const getProducts = async () => {
     try {
       setIsError(false);
       setIsLoading(true);
-      const results = await axios("http://localhost:4001/products");
+      const results = await axios(
+        `http://localhost:4001/products/?name=${keyword}&category=${category}&page=${page}&limit=${limit}`
+      );
+      console.log(results);
       setProducts(results.data.data);
+      setTotalPage(results.data.totalPage);
+
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
       setIsError(true);
     }
   };
-
+  // async function getTotalPage() {
+  //   const result = await axios.get(`http://localhost:4001/products/`);
+  //   console.log(result.length);
+  //   return Math.ceil(result.length / 5);
+  // }
   const deleteProduct = async (productId) => {
     await axios.delete(`http://localhost:4001/products/${productId}`);
     const newProducts = products.filter((product) => product._id !== productId);
     setProducts(newProducts);
   };
 
+  function displayTime(createTime) {
+    const date = new Date(createTime);
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+
+    return `${date.getDate()} ${
+      months[date.getMonth()]
+    } ${date.getFullYear()} ${date.toLocaleTimeString()}`;
+  }
+
   useEffect(() => {
     getProducts();
-  }, []);
+  }, [keyword, category, page]);
 
   return (
     <div>
@@ -48,16 +83,31 @@ function HomePage() {
         <div className="search-box">
           <label>
             Search product
-            <input type="text" placeholder="Search by name" />
+            <input
+              type="text"
+              placeholder="Search by name"
+              value={keyword}
+              onChange={(e) => {
+                setKeyword(e.target.value);
+                setPage(0);
+              }}
+            />
           </label>
         </div>
         <div className="category-filter">
           <label>
             View Category
-            <select id="category" name="category" value="it">
-              <option disabled value="">
-                -- Select a category --
-              </option>
+            <select
+              id="category"
+              name="category"
+              value={category}
+              onChange={(e) => {
+                setCategory(e.target.value);
+                setPage(0);
+              }}
+            >
+              <option value="">All</option>
+
               <option value="it">IT</option>
               <option value="fashion">Fashion</option>
               <option value="food">Food</option>
@@ -86,7 +136,7 @@ function HomePage() {
                 <h1>Product name: {product.name} </h1>
                 <h2>Product price: {product.price}</h2>
                 <h3>Category: {product.category}</h3>
-                <h3>Created Time: 1 Jan 2011, 00:00:00</h3>
+                <h3>Created Time: {displayTime(product.create_time)}</h3>
                 <p>Product description: {product.description} </p>
                 <div className="product-actions">
                   <button
@@ -124,10 +174,26 @@ function HomePage() {
       </div>
 
       <div className="pagination">
-        <button className="previous-button">Previous</button>
-        <button className="next-button">Next</button>
+        <button
+          className="previous-button"
+          onClick={() => {
+            page > 0 ? setPage(page - 1) : "";
+          }}
+        >
+          Previous
+        </button>
+        <button
+          className="next-button"
+          onClick={() => {
+            page + 1 < totalPage ? setPage(page + 1) : "";
+          }}
+        >
+          Next
+        </button>
       </div>
-      <div className="pages">1/ total page</div>
+      <div className="pages">
+        {page + 1}/{totalPage}
+      </div>
     </div>
   );
 }
