@@ -30,6 +30,7 @@ productRouter.get("/", async (req, res) => {
       .sort({ create_time: -1 })
       .skip(page * 5)
       .limit(+(req.query.limit ?? 5))
+
       .toArray();
 
     return res.json({
@@ -74,13 +75,15 @@ productRouter.post("/", async (req, res) => {
     image,
     description,
     category,
-    create_time: new Date().toISOString(),
   };
 
   const productData = { ...newProduct };
 
   try {
-    const product = await collection.insertOne(productData);
+    const product = await collection.insertOne({
+      ...productData,
+      create_time: new Date(),
+    });
     return res.json({
       message: `Product Id:(${product.insertedId}):(${productData.name}) has been created successfully`,
     });

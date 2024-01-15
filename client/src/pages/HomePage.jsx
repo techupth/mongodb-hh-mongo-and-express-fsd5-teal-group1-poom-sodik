@@ -37,8 +37,9 @@ function HomePage() {
   // }
   const deleteProduct = async (productId) => {
     await axios.delete(`http://localhost:4001/products/${productId}`);
-    const newProducts = products.filter((product) => product._id !== productId);
-    setProducts(newProducts);
+    getProducts();
+    // const newProducts = products.filter((product) => product._id !== productId);
+    // setProducts(newProducts);
   };
 
   function displayTime(createTime) {
@@ -177,7 +178,10 @@ function HomePage() {
         <button
           className="previous-button"
           onClick={() => {
-            page > 0 ? setPage(page - 1) : "";
+            if (page > 0) {
+              setPage(page - 1);
+              window.scrollTo(0, 0);
+            }
           }}
         >
           Previous
@@ -185,14 +189,17 @@ function HomePage() {
         <button
           className="next-button"
           onClick={() => {
-            page + 1 < totalPage ? setPage(page + 1) : "";
+            if (page + 1 < totalPage) {
+              setPage(page + 1);
+              window.scrollTo(0, 0);
+            }
           }}
         >
           Next
         </button>
       </div>
       <div className="pages">
-        {page + 1}/{totalPage}
+        {products.length === 0 ? "0" : page + 1}/{totalPage}
       </div>
     </div>
   );
