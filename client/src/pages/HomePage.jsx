@@ -8,12 +8,18 @@ function HomePage() {
   const [products, setProducts] = useState([]);
   const [isError, setIsError] = useState(null);
   const [isLoading, setIsLoading] = useState(null);
+  const [category, setCategory] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const [page, setpage] = useState(0);
+  const [limit, setLimit] = useState(5);
 
   const getProducts = async () => {
     try {
       setIsError(false);
       setIsLoading(true);
-      const results = await axios("http://localhost:4001/products");
+      const results = await axios(
+        `http://localhost:4001/products?category=${category}&name=${searchText}&page=${page}&limit=${limit}`
+      );
       setProducts(results.data.data);
       setIsLoading(false);
     } catch (error) {
@@ -22,15 +28,54 @@ function HomePage() {
     }
   };
 
+  const handleInput = (e) => {
+    setSearchText(e.target.value);
+  };
+
   const deleteProduct = async (productId) => {
     await axios.delete(`http://localhost:4001/products/${productId}`);
-    const newProducts = products.filter((product) => product.id !== productId);
-    setProducts(newProducts);
+
+    const results = await axios(
+      `http://localhost:4001/products?category=${category}&name=${searchText}&page=${page}&limit=${limit}`
+    );
+
+    setProducts(results.data.data);
+  };
+
+  const displayTime = (createTime) => {
+    const date = new Date(createTime);
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+
+    return `${date.getDate()} ${
+      months[date.getMonth()]
+    } ${date.getFullYear()} ${date.toLocaleTimeString()}`;
+  };
+  const nextPage = () => {
+    setpage(page + 1);
+  };
+  const previousPage = () => {
+    if (page >= 0) {
+      setpage(0);
+    }
+    setpage(page - 1);
   };
 
   useEffect(() => {
     getProducts();
-  }, [products]);
+  }, [category, searchText, page]);
 
   return (
     <div>
@@ -48,13 +93,25 @@ function HomePage() {
         <div className="search-box">
           <label>
             Search product
-            <input type="text" placeholder="Search by name" />
+            <input
+              type="text"
+              placeholder="Search by name"
+              value={searchText}
+              onChange={handleInput}
+            />
           </label>
         </div>
         <div className="category-filter">
           <label>
             View Category
-            <select id="category" name="category" value="it">
+            <select
+              id="category"
+              name="category"
+              value={category}
+              onChange={(e) => {
+                setCategory(e.target.value);
+              }}
+            >
               <option disabled value="">
                 -- Select a category --
               </option>
@@ -85,8 +142,8 @@ function HomePage() {
               <div className="product-detail">
                 <h1>Product name: {product.name} </h1>
                 <h2>Product price: {product.price}</h2>
-                <h3>Category: IT</h3>
-                <h3>Created Time: 1 Jan 2011, 00:00:00</h3>
+                <h3>Category: {product.category}</h3>
+                <h3>Created {displayTime(product.time)}</h3>
                 <p>Product description: {product.description} </p>
                 <div className="product-actions">
                   <button
@@ -124,10 +181,14 @@ function HomePage() {
       </div>
 
       <div className="pagination">
-        <button className="previous-button">Previous</button>
-        <button className="next-button">Next</button>
+        <button className="previous-button" onClick={previousPage}>
+          Previous
+        </button>
+        <button className="next-button" onClick={nextPage}>
+          Next
+        </button>
       </div>
-      <div className="pages">1/ total page</div>
+      <div className="pages">{page + 1}</div>
     </div>
   );
 }
